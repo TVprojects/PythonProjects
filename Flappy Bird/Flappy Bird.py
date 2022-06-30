@@ -24,10 +24,11 @@ vogel_afbeelding = 'afbeeldingen/vogel.png'
 grond_afbeelding = 'afbeeldingen/grond.jfif'
 grond = 0
 
+
 def genereerPijp():
     offset = window_hoogte / 3
     pijp_hoogte = spel_afbeeldingen['pijp_afbeelding'][0].get_height()
-    y2 = offset + random.randrange(0, int(window_hoogte - spel_afbeeldingen['grond'].get_height()- 1.2 * offset))
+    y2 = offset + random.randrange(0, int(window_hoogte - spel_afbeeldingen['grond'].get_height() - 1.2 * offset))
     x = window_breedte + 10
     y1 = pijp_hoogte - y2 + offset
 
@@ -39,6 +40,8 @@ def genereerPijp():
         {'x': x, 'y': y2},
     ]
     return pijp
+
+
 def speel_flappybird():
     """""
     deze functie zorgt ervoor dat onze statische afbeeldingen met elkaar gaan communiceren en dat we daadwerkelijk
@@ -55,9 +58,19 @@ def speel_flappybird():
     eerste_pijp = genereerPijp()
     tweede_pijp = genereerPijp()
 
-    print(eerste_pijp, tweede_pijp)
+    # Genereer de boven en onder pijpen.
+    onder_pijpen = [
+        {'x': window_breedte + 300 - mijn_hoogte,
+         'y': eerste_pijp[1]['y']},
+        {'x': window_breedte + 300 - mijn_hoogte + (window_breedte / 2),
+         'y': eerste_pijp[1]['y']}
+    ]
+
+    print(onder_pijpen)
 
 # Dit is de start van je programma
+
+
 if __name__ == '__main__':
     # Initialiseer de pygame module
     pygame.init()
