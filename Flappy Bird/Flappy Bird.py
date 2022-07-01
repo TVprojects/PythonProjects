@@ -63,10 +63,59 @@ def speel_flappybird():
         {'x': window_breedte + 300 - mijn_hoogte,
          'y': eerste_pijp[1]['y']},
         {'x': window_breedte + 300 - mijn_hoogte + (window_breedte / 2),
-         'y': eerste_pijp[1]['y']}
+         'y': tweede_pijp[1]['y']}
     ]
 
-    print(onder_pijpen)
+    boven_pijpen = [
+        {'x': window_breedte + 300 - mijn_hoogte,
+         'y': eerste_pijp[0]['y']},
+        {'x': window_breedte + 300 - mijn_hoogte + (window_breedte / 2),
+        'y': tweede_pijp[0]['y']}
+    ]
+
+    # Hoe snel de vogel vliegt
+    vogel_snelheid = -9
+    vogel_maxsnelheid = 10
+    vogel_toename_snelheid = 1
+    vogel_falp_snelheid = -8
+    vogelflapt = False
+
+    while True:
+        for evenement in pygame.event.get():
+            # Een gebruiker kan het spel stoppen door op het kruisje te drukken of op ESC te drukken.
+            if evenement.type == QUIT or (evenement.type == KEYDOWN and evenement.type == KSCAN_ESCAPE):
+                pygame.quit()
+                sys.exit()
+
+            # Als de gebruiker op spatie drukt, dan beweegt flappybird.
+            elif evenement.type == KEYDOWN and (evenement.type == K_SPACE or evenement.key == K_SPACE):
+                if y > 0:
+                    vogel_snelheid = vogel_falp_snelheid
+                    vogelflapt = True
+
+        # Bepaal waar de speler zich bevindt.
+        speler_midden_pos = x + spel_afbeeldingen['flappybird'].get_width() / 2
+
+        # Bepaal waar de pijpen zich bevinden.
+        for pijp in boven_pijpen:
+            pijp_midden_pos = pijp['x'] + 
+
+        # Als de gebruiker de vogel niet laat vliegen dan valt hij steeds harder naar benenden.
+        if vogel_snelheid < vogel_maxsnelheid and not vogelflapt:
+            vogel_snelheid += vogel_toename_snelheid
+        if vogelflapt:
+            vogelflapt = False
+
+        # Bepaal de hoogte van de vogel wanneer iemand op spatie drukt.
+        y = y + min(vogel_snelheid, verhoging - y - spel_afbeeldingen['flappybird'].get_height())
+
+        # Update alle afbeeldingen zodat het lijkt dat het spel beweegt.
+        window.blit(spel_afbeeldingen['achtergrond'], (0, 0))
+        window.blit(spel_afbeeldingen['grond'], (grond, verhoging))
+        window.blit(spel_afbeeldingen['flappybird'], (x, y))
+
+        pygame.display.update()
+        frames_per_seconden_klok.tick(frames_per_seconden)
 
 # Dit is de start van je programma
 
