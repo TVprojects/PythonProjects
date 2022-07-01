@@ -15,7 +15,7 @@ window_hoogte = 499
 
 # Configutatie van het spel
 window = pygame.display.set_mode((window_breedte, window_hoogte))
-verhoging = window_hoogte * 0.8
+verhoging = window_hoogte * 1
 spel_afbeeldingen = {}
 frames_per_seconden = 32
 pijp_afbeelding = 'afbeeldingen/pijp.png'
@@ -41,6 +41,27 @@ def genereerPijp():
     ]
     return pijp
 
+def is_dood(x, y, boven_pijpen, onder_pijpen):
+    pijphoogte = spel_afbeeldingen['pijp_afbeelding'][0].get_height()
+    pijpbreedte = spel_afbeeldingen['pijp_afbeelding'][0].get_width()
+
+    # Valt de vogel op de grond / plafon?
+    if y > verhoging - 25 or y < 0:
+        return True
+
+    # Komt de vogel tegen de bovenkant / bovenkant van de pijp?
+    for pijp in boven_pijpen:
+
+        if y < pijphoogte + pijp['y'] and abs(x - pijp['x']) < pijpbreedte:
+            print("Dood van boven!")
+            return True
+    # Komt de vogel tegen de onderkant / onderkant van de pijp?
+    for pijp in onder_pijpen:
+        if y + spel_afbeeldingen['flappybird'].get_height() > pijp['y'] and abs(x - pijp['x']) < pijpbreedte:
+            print("Dood van onder!")
+            return  True
+
+    return False
 
 def speel_flappybird():
     """""
@@ -93,12 +114,20 @@ def speel_flappybird():
                     vogel_snelheid = vogel_falp_snelheid
                     vogelflapt = True
 
+        if is_dood(x, y, boven_pijpen, onder_pijpen):
+            return
+
         # Bepaal waar de speler zich bevindt.
         speler_midden_pos = x + spel_afbeeldingen['flappybird'].get_width() / 2
 
         # Bepaal waar de pijpen zich bevinden.
         for pijp in boven_pijpen:
-            pijp_midden_pos = pijp['x'] + 
+            pijp_midden_pos = pijp['x'] + spel_afbeeldingen['pijp_afbeelding'][0].get_width() / 2
+
+            # Als je voorbij zo een pijp komt, krijg je een punt.
+            if pijp_midden_pos <= speler_midden_pos < pijp_midden_pos + 4:
+                score += 1
+                print(f"Je score is nu {score}!")
 
         # Als de gebruiker de vogel niet laat vliegen dan valt hij steeds harder naar benenden.
         if vogel_snelheid < vogel_maxsnelheid and not vogelflapt:
@@ -109,10 +138,41 @@ def speel_flappybird():
         # Bepaal de hoogte van de vogel wanneer iemand op spatie drukt.
         y = y + min(vogel_snelheid, verhoging - y - spel_afbeeldingen['flappybird'].get_height())
 
+        # Verplaats de pijpen.
+        for bovenpijp, onderpijp in zip(boven_pijpen, onder_pijpen):
+            bovenpijp['x'] += -4
+            onderpijp['x'] += -4
+
+        # Genereer steeds nieuwe pijpen wanneer ze van het scherm zijn.
+        if 0 < boven_pijpen[0]['x'] < 5:
+            nieuwe_pijp = genereerPijp()
+            boven_pijpen.append(nieuwe_pijp[0])
+            onder_pijpen.append(nieuwe_pijp[1])
+
+        # Als een pijp uit scherm verdwenen is, haal deze dan uit de lijst.
+        if boven_pijpen[0]['x'] < -spel_afbeeldingen['pijp_afbeelding'][0].get_width():
+            boven_pijpen.pop(0)
+            onder_pijpen.pop(0)
+
         # Update alle afbeeldingen zodat het lijkt dat het spel beweegt.
         window.blit(spel_afbeeldingen['achtergrond'], (0, 0))
         window.blit(spel_afbeeldingen['grond'], (grond, verhoging))
         window.blit(spel_afbeeldingen['flappybird'], (x, y))
+        for bovenpijp, onderpijp in zip(boven_pijpen, onder_pijpen):
+            window.blit(spel_afbeeldingen['pijp_afbeelding'][0], (bovenpijp['x'], bovenpijp['y']))
+            window.blit(spel_afbeeldingen['pijp_afbeelding'][1], (onderpijp['x'], onderpijp['y']))
+
+        nummers = [int(x) for x in list(str(score))]
+        breedte = 0
+        for num in nummers:
+            breedte += spel_afbeeldingen['score_afbeeldingen'][num].get_width()
+        xOffset = (window_breedte - breedte) / 1.1
+
+        # Voeg de nummers dan ook toe aan het scherm.
+        for num in nummers:
+            window.blit(spel_afbeeldingen['score_afbeeldingen'][num], (xOffset, window_breedte * 0.02))
+
+            xOffset += spel_afbeeldingen['score_afbeeldingen'][num].get_width()
 
         pygame.display.update()
         frames_per_seconden_klok.tick(frames_per_seconden)
