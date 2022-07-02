@@ -8,6 +8,7 @@ import random
 import sys
 import pygame
 from pygame.locals import *
+import button
 
 # Bepaal de hoogte van je speelscherm
 window_breedte = 600
@@ -22,8 +23,13 @@ pijp_afbeelding = 'afbeeldingen/pijp.png'
 achtergrond_afbeelding = 'afbeeldingen/achtergrond.jpg'
 vogel_afbeelding = 'afbeeldingen/vogel.png'
 grond_afbeelding = 'afbeeldingen/grond.jfif'
+start_afbeelding = 'afbeeldingen/flappy-bird-startscherm.jpg'
+dood_afbeelding = 'afbeeldingen/dood_scherm.png'
+start_img = pygame.image.load('afbeeldingen/Flappy-start-button.png').convert_alpha()
+rang_img = pygame.image.load('afbeeldingen/rang.png')
 grond = 0
-
+playButtonPressed = False
+rangButtonPressed = False
 
 def genereerPijp():
     offset = window_hoogte / 3
@@ -59,11 +65,12 @@ def is_dood(x, y, boven_pijpen, onder_pijpen):
     for pijp in onder_pijpen:
         if y + spel_afbeeldingen['flappybird'].get_height() > pijp['y'] and abs(x - pijp['x']) < pijpbreedte:
             print("Dood van onder!")
-            return  True
-
+            return True
     return False
 
+
 def speel_flappybird():
+    pop_start_scherm = 0
     """""
     deze functie zorgt ervoor dat onze statische afbeeldingen met elkaar gaan communiceren en dat we daadwerkelijk
     het spel kunnen gaan spelen.
@@ -102,6 +109,7 @@ def speel_flappybird():
     vogelflapt = False
 
     while True:
+
         for evenement in pygame.event.get():
             # Een gebruiker kan het spel stoppen door op het kruisje te drukken of op ESC te drukken.
             if evenement.type == QUIT or (evenement.type == KEYDOWN and evenement.type == KSCAN_ESCAPE):
@@ -110,7 +118,11 @@ def speel_flappybird():
 
             # Als de gebruiker op spatie drukt, dan beweegt flappybird.
             elif evenement.type == KEYDOWN and (evenement.type == K_SPACE or evenement.key == K_SPACE):
+
                 if y > 0:
+                    if pop_start_scherm == 0:
+
+                        pop_start_scherm += 1
                     vogel_snelheid = vogel_falp_snelheid
                     vogelflapt = True
 
@@ -201,6 +213,9 @@ if __name__ == '__main__':
         pygame.image.load('afbeeldingen/8.png').convert_alpha(),
         pygame.image.load('afbeeldingen/9.png').convert_alpha()
     )
+
+    spel_afbeeldingen['dood_scherm'] = pygame.image.load(dood_afbeelding).convert_alpha()
+    spel_afbeeldingen['start_scherm'] = pygame.image.load(start_afbeelding).convert_alpha()
     spel_afbeeldingen['flappybird'] = pygame.image.load(vogel_afbeelding).convert_alpha()
     spel_afbeeldingen['grond'] = pygame.image.load(grond_afbeelding).convert_alpha()
     spel_afbeeldingen['achtergrond'] = pygame.image.load(achtergrond_afbeelding).convert_alpha()
@@ -216,24 +231,61 @@ if __name__ == '__main__':
         # Zet bird op de juiste plek
         x = window_breedte // 5
         y = (window_hoogte - spel_afbeeldingen['flappybird'].get_height()) // 2
+        dood = False
 
         while True:
             for evenement in pygame.event.get():
-
+                print(evenement.type, QUIT)
                 # Een gebruiker kan het spel stoppen door op het kruisje te drukken of op ESC te drukken.
                 if evenement.type == QUIT or (evenement.type == KEYDOWN and evenement.type == KSCAN_ESCAPE):
+                    print('QUIT')
                     pygame.quit()
                     sys.exit()
 
                 # Als de gebruiker op spatie drukt, dan beweegt flappybird.
-                elif evenement.type == KEYDOWN and (evenement.type == K_SPACE or evenement.key == K_SPACE):
+                elif playButtonPressed:
+                    playButtonPressed = False
+                    print('PLAY')
                     speel_flappybird()
+                    dood = True
 
-                # Als de gebruiker niets doet dan gebuird er ook niets.
+                elif rangButtonPressed:
+                    rangButtonPressed = False
+                    print('RANG')
+                    # doe rang
+
+                # Als de gebruiker niets doet dan gebeurt er ook niets.
                 else:
+                    print('START of DOOD')
                     window.blit(spel_afbeeldingen['achtergrond'], (0, 0))
                     window.blit(spel_afbeeldingen['flappybird'], (x, y))
                     window.blit(spel_afbeeldingen['grond'], (grond, verhoging))
+                    if not dood:
+                        window.blit(spel_afbeeldingen['start_scherm'], (0, 0))
+                        button_start = button.Button(158, 350, start_img, 1)
+                        button_rang = button.Button(408, 350, rang_img, 1)
+                    else:
+                        window.blit(spel_afbeeldingen['dood_scherm'], (0, 0))
+                        button_start = button.Button(158, 350, start_img, 1)
+                        button_rang = button.Button(408, 350, rang_img, 1)
+
+                    run = True
+                    while run:
+
+                        if button_start.draw(window):
+                            print("playButtonPressed")
+                            playButtonPressed = True
+                            run = False
+
+                        if button_rang.draw(window):
+                            print("RANG")
+                            rangButtonPressed = True
+                            run = False
+
+                        for evenement in pygame.event.get():
+                            pass
+
+                        pygame.display.update()
 
                     pygame.display.update()
                     frames_per_seconden_klok.tick(frames_per_seconden)
