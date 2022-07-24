@@ -13,7 +13,7 @@ from pygame.locals import *
 window_breedte = 600
 window_hoogte = 499
 
-# Configutatie van het spel
+# Configuratie van het spel
 window = pygame.display.set_mode((window_breedte, window_hoogte))
 verhoging = window_hoogte * 0.8
 spel_afbeeldingen = {}
@@ -25,7 +25,7 @@ grond_afbeelding = 'afbeeldingen/grond.jfif'
 grond = 0
 
 
-def genereerPijp():
+def genereer_pijp():
     offset = window_hoogte / 3
     pijp_hoogte = spel_afbeeldingen['pijp_afbeelding'][0].get_height()
     y2 = offset + random.randrange(0, int(window_hoogte - spel_afbeeldingen['grond'].get_height() - 1.2 * offset))
@@ -41,6 +41,7 @@ def genereerPijp():
     ]
     return pijp
 
+
 def is_dood(x, y, boven_pijpen, onder_pijpen):
     pijphoogte = spel_afbeeldingen['pijp_afbeelding'][0].get_height()
     pijpbreedte = spel_afbeeldingen['pijp_afbeelding'][0].get_width()
@@ -53,15 +54,16 @@ def is_dood(x, y, boven_pijpen, onder_pijpen):
     for pijp in boven_pijpen:
 
         if y < pijphoogte + pijp['y'] and abs(x - pijp['x']) < pijpbreedte:
-            print("Dood van boven!")
+            print("Dood van boven!", x, pijp['x'], pijpbreedte)
             return True
     # Komt de vogel tegen de onderkant / onderkant van de pijp?
     for pijp in onder_pijpen:
         if y + spel_afbeeldingen['flappybird'].get_height() > pijp['y'] and abs(x - pijp['x']) < pijpbreedte:
             print("Dood van onder!")
-            return  True
+            return True
 
     return False
+
 
 def speel_flappybird():
     """""
@@ -76,8 +78,8 @@ def speel_flappybird():
     y = window_breedte // 2
 
     # Genereer 2 soorten pijpen. Deze noemen we onder pijpen en boven pijpen.
-    eerste_pijp = genereerPijp()
-    tweede_pijp = genereerPijp()
+    eerste_pijp = genereer_pijp()
+    tweede_pijp = genereer_pijp()
 
     # Genereer de boven en onder pijpen.
     onder_pijpen = [
@@ -145,7 +147,7 @@ def speel_flappybird():
 
         # Genereer steeds nieuwe pijpen wanneer ze van het scherm zijn.
         if 0 < boven_pijpen[0]['x'] < 5:
-            nieuwe_pijp = genereerPijp()
+            nieuwe_pijp = genereer_pijp()
             boven_pijpen.append(nieuwe_pijp[0])
             onder_pijpen.append(nieuwe_pijp[1])
 
